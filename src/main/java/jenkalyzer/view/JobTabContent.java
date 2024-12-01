@@ -14,24 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package jenkalyzer;
+package jenkalyzer.view;
 
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import jenkalyzer.model.Configuration;
-import jenkalyzer.view.MainWindowContent;
 
-public class Application extends javafx.application.Application {
+public class JobTabContent extends VBox {
 
-	public static void main(final String[] args) {
-		launch(args);
-	}
+	public JobTabContent(final Configuration aConfiguration) {
+		final Label label = new Label("Job URL");
+		final TextField jobUrlField = new TextField();
+		jobUrlField.textProperty().bindBidirectional(aConfiguration.jobUrlProperty());
+		getChildren().add(label);
+		getChildren().add(jobUrlField);
 
-	@Override
-	public void start(final Stage aPrimaryStage) throws Exception {
-		final Configuration configuration = new Configuration();
-		final Scene scene = new Scene(new MainWindowContent(configuration));
-		aPrimaryStage.setScene(scene);
-		aPrimaryStage.show();
+		final int m = MainWindowContent.TAB_CONTENT_MARGIN;
+		setMargin(label, new Insets(m, m, 0, m));
+		setMargin(jobUrlField, new Insets(m));
 	}
 }

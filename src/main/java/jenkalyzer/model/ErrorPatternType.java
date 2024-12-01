@@ -14,10 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package jenkalyzer;
+package jenkalyzer.model;
 
-public class Main {
-	public static void main(final String[] args) {
-		Application.main(args);
-	}
+public enum ErrorPatternType {
+	RAW_STRING, REGULAR_EXPRESSION
 }

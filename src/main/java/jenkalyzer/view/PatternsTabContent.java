@@ -14,10 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package jenkalyzer;
+package jenkalyzer.view;
 
-public class Main {
-	public static void main(final String[] args) {
-		Application.main(args);
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import jenkalyzer.model.Configuration;
+
+public class PatternsTabContent extends VBox {
+
+	public PatternsTabContent(final Configuration aConfiguration) {
+		final Label label = new Label("Patterns");
+		getChildren().add(label);
+
+		final int m = MainWindowContent.TAB_CONTENT_MARGIN;
+		setMargin(label, new Insets(m, m, 0, m));
+//		setMargin(jobUrlField, new Insets(m));
+
 	}
 }
