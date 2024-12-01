@@ -1,0 +1,56 @@
+/*
+ * This file is part of "Jenkalyzer".
+ * Copyright (c) 2024 Patrik Larsson.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+plugins {
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+sourceCompatibility = 17
+targetCompatibility = sourceCompatibility
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = '22.0.2'
+    modules = ['javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.swing']
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
+}
+
+jar {
+    // Fat jar
+    from (configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {}
+    duplicatesStrategy = 'FAIL'
+    exclude 'META-INF/**',
+            '**/module-info.class'
+
+    manifest {
+        attributes('Main-Class': 'jenkalyzer.Main')
+    }
+}
