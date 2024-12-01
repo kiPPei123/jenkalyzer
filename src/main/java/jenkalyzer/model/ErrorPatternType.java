@@ -17,5 +17,19 @@
 package jenkalyzer.model;
 
 public enum ErrorPatternType {
-	RAW_STRING, REGULAR_EXPRESSION
+	RAW_STRING, REGULAR_EXPRESSION;
+
+	@Override
+	public String toString() {
+		switch (this) {
+		case RAW_STRING: {
+			return "String";
+		}
+		case REGULAR_EXPRESSION: {
+			return "Regex";
+		}
+		default:
+			throw new IllegalArgumentException("Unexpected value: " + this);
+		}
+	}
 }

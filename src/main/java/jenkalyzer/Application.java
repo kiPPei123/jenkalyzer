@@ -31,6 +31,7 @@ public class Application extends javafx.application.Application {
 	public void start(final Stage aPrimaryStage) throws Exception {
 		final Configuration configuration = new Configuration();
 		final Scene scene = new Scene(new MainWindowContent(configuration));
+		aPrimaryStage.setTitle("Jenkalyzer");
 		aPrimaryStage.setScene(scene);
 		aPrimaryStage.show();
 	}

@@ -34,6 +34,6 @@ public class MainWindowContent extends Pane {
 		tabPane.getTabs().add(new Tab("Results", new ResultsTabContent(aConfiguration)));
 		getChildren().add(tabPane);
 
-		tabPane.setPrefSize(400, 600);
+		tabPane.setPrefSize(800, 600);
 	}
 }

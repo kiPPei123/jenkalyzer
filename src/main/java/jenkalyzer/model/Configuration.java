@@ -16,24 +16,30 @@
  */
 package jenkalyzer.model;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
 public class Configuration {
+	private final int MAGIC_COOKIE = 3873480;
+
 	private final Path configDir = Path.of(System.getenv("AppData"), "jenkalyzer");
 	private final Path jobUrlFile = configDir.resolve("joburl.txt");
-	private final Path patternsFile = configDir.resolve("patterns.txt");
+	private final Path patternsFile = configDir.resolve("patterns");
 
 	private final StringProperty jobUrl = new SimpleStringProperty(null);
-	private final ListProperty<ErrorPattern> errorPatterns = new SimpleListProperty<>();
+	private final ObservableList<ErrorPattern> errorPatterns = FXCollections.observableArrayList();
 
 	public Configuration() {
 		try {
@@ -41,22 +47,31 @@ public class Configuration {
 		} catch (final IOException e1) {
 			e1.printStackTrace();
 		}
-		final ChangeListener<? super Object> saveListener = (aObs, aOld, aNew) -> {
-			try {
-				save();
-			} catch (final IOException e) {
-				e.printStackTrace();
+		jobUrl.addListener((ChangeListener<Object>) (aObs, aOld, aNew) -> save());
+		errorPatterns.addListener((ListChangeListener<ErrorPattern>) aChange -> {
+			save();
+			while (aChange.next()) {
+				for (final ErrorPattern addedPattern : aChange.getAddedSubList()) {
+					addSaveListener(addedPattern);
+				}
 			}
-		};
-		jobUrl.addListener(saveListener);
-		errorPatterns.addListener(saveListener);
+		});
+		for (final ErrorPattern addedPattern : errorPatterns) {
+			addSaveListener(addedPattern);
+		}
+	}
+
+	private void addSaveListener(final ErrorPattern aPattern) {
+		aPattern.typeproperty().addListener((aObs, aOld, aNew) -> save());
+		aPattern.nameProperty().addListener((aObs, aOld, aNew) -> save());
+		aPattern.stringProperty().addListener((aObs, aOld, aNew) -> save());
 	}
 
 	public StringProperty jobUrlProperty() {
 		return jobUrl;
 	}
 
-	public ListProperty<ErrorPattern> errorPatternsProperty() {
+	public ObservableList<ErrorPattern> getErrorPatterns() {
 		return errorPatterns;
 	}
 
@@ -69,26 +84,36 @@ public class Configuration {
 			jobUrl.set(Files.readString(jobUrlFile).strip());
 		}
 		if (jobUrlFile.toFile().isFile()) {
-			final List<String> lines = Files.readAllLines(patternsFile);
-			for (final String unstripped : lines) {
-				final String line = unstripped.strip();
-				if (line.length() < 2)
-					continue;
-				errorPatterns.add(new ErrorPattern(
-						line.charAt(0) == 'S' ? ErrorPatternType.RAW_STRING : ErrorPatternType.REGULAR_EXPRESSION,
-						line.substring(1)));
+			try (DataInputStream stream = new DataInputStream(new FileInputStream(patternsFile.toFile()))) {
+				if (stream.readInt() != MAGIC_COOKIE) {
+					return;
+				}
+				final int count = stream.readInt();
+				for (int i = 0; i < count; i++) {
+					errorPatterns.add(ErrorPattern.fromStream(stream));
+				}
 			}
 		}
 	}
 
-	public void save() throws IOException {
+	public void save() {
 		System.out.println("Saving configuration");
 		if (!configDir.toFile().exists()) {
 			configDir.toFile().mkdir();
 		}
-		Files.writeString(jobUrlFile, jobUrl.get() != null ? jobUrl.get() : "");
-		final List<String> patternLines = errorPatterns.stream()
-				.map(ep -> (ep.type() == ErrorPatternType.RAW_STRING ? "S" : "R") + ep.string()).toList();
-		Files.write(patternsFile, patternLines);
+		try {
+			Files.writeString(jobUrlFile, jobUrl.get() != null ? jobUrl.get() : "");
+		} catch (final IOException e1) {
+			e1.printStackTrace();
+		}
+		try (final DataOutputStream stream = new DataOutputStream(new FileOutputStream(patternsFile.toFile()))) {
+			stream.writeInt(MAGIC_COOKIE);
+			stream.writeInt(errorPatterns.size());
+			for (final ErrorPattern errorPattern : errorPatterns) {
+				errorPattern.toStream(stream);
+			}
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
