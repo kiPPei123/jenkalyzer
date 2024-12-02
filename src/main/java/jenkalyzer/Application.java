@@ -19,6 +19,7 @@ package jenkalyzer;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jenkalyzer.model.Configuration;
+import jenkalyzer.model.LogDataBase;
 import jenkalyzer.view.MainWindowContent;
 
 public class Application extends javafx.application.Application {
@@ -30,7 +31,8 @@ public class Application extends javafx.application.Application {
 	@Override
 	public void start(final Stage aPrimaryStage) throws Exception {
 		final Configuration configuration = new Configuration();
-		final Scene scene = new Scene(new MainWindowContent(configuration));
+		final LogDataBase logDataBase = new LogDataBase(configuration);
+		final Scene scene = new Scene(new MainWindowContent(configuration, logDataBase));
 		aPrimaryStage.setTitle("Jenkalyzer");
 		aPrimaryStage.setScene(scene);
 		aPrimaryStage.show();

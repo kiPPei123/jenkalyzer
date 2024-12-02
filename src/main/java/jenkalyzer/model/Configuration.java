@@ -67,6 +67,10 @@ public class Configuration {
 		aPattern.stringProperty().addListener((aObs, aOld, aNew) -> save());
 	}
 
+	public Path getConfigDir() {
+		return configDir;
+	}
+
 	public StringProperty jobUrlProperty() {
 		return jobUrl;
 	}

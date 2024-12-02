@@ -21,12 +21,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.Pane;
 import jenkalyzer.model.Configuration;
+import jenkalyzer.model.LogDataBase;
 
 public class MainWindowContent extends Pane {
 
 	public static final int TAB_CONTENT_MARGIN = 5;
 
-	public MainWindowContent(final Configuration aConfiguration) {
+	public MainWindowContent(final Configuration aConfiguration, final LogDataBase aLogDataBase) {
 		final TabPane tabPane = new TabPane();
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabPane.getTabs().add(new Tab("Job", new JobTabContent(aConfiguration)));
