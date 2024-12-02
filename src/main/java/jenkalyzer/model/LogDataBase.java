@@ -23,9 +23,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,6 +53,10 @@ public class LogDataBase {
 		configuration = Objects.requireNonNull(aConfiguration);
 		aConfiguration.jobUrlProperty().addListener((aObs, aOld, aNew) -> update());
 		update();
+	}
+
+	public Set<Integer> getDownloadedBuildNumbers() {
+		return Collections.unmodifiableSet(downloadedBuildNumbers);
 	}
 
 	public ReadOnlyIntegerProperty highestBuildNumberProperty() {
@@ -123,6 +130,15 @@ public class LogDataBase {
 		update();
 	}
 
+	public List<String> getLogLines(final int aBuildNumber) {
+		try {
+			return Files.readAllLines(logDir.resolve(aBuildNumber + ".txt"));
+		} catch (final IOException e) {
+			e.printStackTrace();
+			return List.of();
+		}
+	}
+
 	private int requestMaxBuildNumber() throws IOException {
 		final String jobUrl = configuration.jobUrlProperty().get();
 		final URL url = new URL(jobUrl + (jobUrl.endsWith("/") ? "" : "/") + "api/xml");
@@ -136,11 +152,11 @@ public class LogDataBase {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				final Pattern pattern = Pattern.compile(".*<number>([0-9]+)</number>.*");
+				final Pattern pattern = Pattern.compile("<number>([0-9]+)</number>");
 				final Matcher matcher = pattern.matcher(line);
-				if (!matcher.matches())
-					continue;
-				maxNumber = Math.max(maxNumber, Integer.parseInt(matcher.group(1)));
+				while (matcher.find()) {
+					maxNumber = Math.max(maxNumber, Integer.parseInt(matcher.group(1)));
+				}
 			}
 		}
 		System.out.println("Got latest build number: " + maxNumber);

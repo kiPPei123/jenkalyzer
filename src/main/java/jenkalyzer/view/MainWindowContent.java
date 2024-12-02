@@ -35,6 +35,8 @@ public class MainWindowContent extends Pane {
 		tabPane.getTabs().add(new Tab("Analysis", new AnalysisTabContent(aConfiguration, aLogDataBase)));
 		getChildren().add(tabPane);
 
-		tabPane.setPrefSize(800, 600);
+		tabPane.prefHeightProperty().bind(heightProperty());
+		tabPane.prefWidthProperty().bind(widthProperty());
+		setPrefSize(800, 600);
 	}
 }

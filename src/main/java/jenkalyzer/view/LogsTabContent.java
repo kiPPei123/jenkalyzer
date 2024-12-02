@@ -16,8 +16,6 @@
  */
 package jenkalyzer.view;
 
-import java.util.Objects;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,10 +26,7 @@ import jenkalyzer.model.Configuration;
 import jenkalyzer.model.LogDataBase;
 
 public class LogsTabContent extends VBox {
-	private final LogDataBase logDataBase;
-
 	public LogsTabContent(final Configuration aConfiguration, final LogDataBase aLogDataBase) {
-		logDataBase = Objects.requireNonNull(aLogDataBase);
 		final Label urlLabel = new Label("Job URL");
 		final TextField jobUrlField = new TextField();
 		jobUrlField.textProperty().bindBidirectional(aConfiguration.jobUrlProperty());
