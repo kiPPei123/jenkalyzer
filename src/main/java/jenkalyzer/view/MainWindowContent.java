@@ -30,9 +30,9 @@ public class MainWindowContent extends Pane {
 	public MainWindowContent(final Configuration aConfiguration, final LogDataBase aLogDataBase) {
 		final TabPane tabPane = new TabPane();
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-		tabPane.getTabs().add(new Tab("Job", new JobTabContent(aConfiguration)));
+		tabPane.getTabs().add(new Tab("Logs", new LogsTabContent(aConfiguration, aLogDataBase)));
 		tabPane.getTabs().add(new Tab("Patterns", new PatternsTabContent(aConfiguration)));
-		tabPane.getTabs().add(new Tab("Results", new ResultsTabContent(aConfiguration)));
+		tabPane.getTabs().add(new Tab("Analysis", new AnalysisTabContent(aConfiguration, aLogDataBase)));
 		getChildren().add(tabPane);
 
 		tabPane.setPrefSize(800, 600);

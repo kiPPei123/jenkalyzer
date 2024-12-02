@@ -31,11 +31,20 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class LogDataBase {
 
 	private final Set<Integer> downloadedBuildNumbers = new HashSet<>();
 	private final Configuration configuration;
 	private Path logDir = null;
+	private final IntegerProperty highestBuildNumberProperty = new SimpleIntegerProperty(0);
+	private final StringProperty jobNameProperty = new SimpleStringProperty("");
 
 	public LogDataBase(final Configuration aConfiguration) {
 		configuration = Objects.requireNonNull(aConfiguration);
@@ -43,19 +52,31 @@ public class LogDataBase {
 		update();
 	}
 
+	public ReadOnlyIntegerProperty highestBuildNumberProperty() {
+		return highestBuildNumberProperty;
+	}
+
+	public ReadOnlyStringProperty jobNameProperty() {
+		return jobNameProperty;
+	}
+
 	private void update() {
+		jobNameProperty.set("");
+		highestBuildNumberProperty.set(0);
 		try {
 			final String urlPath = new URL(configuration.jobUrlProperty().get()).getPath();
 			final Matcher jobMatch = Pattern.compile("^/job/([^/]*)/?$").matcher(urlPath);
 			if (!jobMatch.matches()) {
 				System.err.println("Could not parse URL.");
+				return;
 			}
 			final String jobName = jobMatch.group(1);
 			logDir = configuration.getConfigDir().resolve("logs").resolve(jobName);
-			if (!logDir.toFile().exists())
-				logDir.toFile().mkdirs();
 
-			refreshDownloadedBuildNumberSet();
+			jobNameProperty.set(jobName);
+			if (logDir.toFile().exists()) {
+				refreshDownloadedBuildNumberSet();
+			}
 
 		} catch (final IOException e) {
 			e.printStackTrace();
@@ -71,6 +92,7 @@ public class LogDataBase {
 				continue;
 			downloadedBuildNumbers.add(Integer.parseInt(nameMatch.group(1)));
 		}
+		highestBuildNumberProperty.set(downloadedBuildNumbers.stream().max(Integer::compareTo).orElse(0));
 		System.out.println("Found build numbers: " + downloadedBuildNumbers);
 	}
 
@@ -79,6 +101,9 @@ public class LogDataBase {
 		try {
 			final int maxDownloadedNumber = downloadedBuildNumbers.stream().max(Integer::compareTo).orElse(0);
 			final int maxActual = requestMaxBuildNumber();
+			if (maxActual > 0 && !logDir.toFile().exists())
+				logDir.toFile().mkdirs();
+
 			for (int i = maxDownloadedNumber + 1; i <= maxActual; i++) {
 				final URL url = new URL(jobUrl + (jobUrl.endsWith("/") ? "" : "/") + i + "/consoleText");
 				System.out.println("Requesting " + url);
@@ -95,6 +120,7 @@ public class LogDataBase {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+		update();
 	}
 
 	private int requestMaxBuildNumber() throws IOException {

@@ -16,23 +16,24 @@
  */
 package jenkalyzer.view;
 
+import java.util.Objects;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import jenkalyzer.model.Configuration;
+import jenkalyzer.model.LogDataBase;
 
-public class JobTabContent extends VBox {
+public class AnalysisTabContent extends VBox {
+	private final LogDataBase logDataBase;
 
-	public JobTabContent(final Configuration aConfiguration) {
-		final Label label = new Label("Job URL");
-		final TextField jobUrlField = new TextField();
-		jobUrlField.textProperty().bindBidirectional(aConfiguration.jobUrlProperty());
+	public AnalysisTabContent(final Configuration aConfiguration, final LogDataBase aLogDataBase) {
+		logDataBase = Objects.requireNonNull(aLogDataBase);
+		final Label label = new Label("Results");
 		getChildren().add(label);
-		getChildren().add(jobUrlField);
 
 		final int m = MainWindowContent.TAB_CONTENT_MARGIN;
 		setMargin(label, new Insets(m, m, 0, m));
-		setMargin(jobUrlField, new Insets(m));
+//		setMargin(jobUrlField, new Insets(m));
 	}
 }
