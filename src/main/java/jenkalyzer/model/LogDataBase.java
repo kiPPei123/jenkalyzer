@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -132,7 +133,10 @@ public class LogDataBase {
 
 	public List<String> getLogLines(final int aBuildNumber) {
 		try {
-			return Files.readAllLines(logDir.resolve(aBuildNumber + ".txt"));
+			// Both Files.readAllLines and BufferedReader fails sometimes.
+			final byte[] allBytes = Files.readAllBytes(logDir.resolve(aBuildNumber + ".txt"));
+			final String everything = new String(allBytes, StandardCharsets.UTF_8);
+			return everything.lines().toList();
 		} catch (final IOException e) {
 			e.printStackTrace();
 			return List.of();
